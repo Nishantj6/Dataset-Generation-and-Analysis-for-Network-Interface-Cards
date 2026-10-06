@@ -1,0 +1,68 @@
+file,column,symbol,unit,type,description,paper_reference
+trajectories,card_id,i,-,int,"Card identifier, 0-199",Sec. V
+trajectories,domain,d_i,-,str,"Operating environment: hot, cold or controlled","Sec. III, Table I"
+trajectories,hour_index,t,h,int,"Hours since the start of operation (0-based, hourly sampling)",Sec. III
+trajectories,T_ambient_C,T_amb,degC,float,Ambient temperature,Eq. (5)
+trajectories,traffic_load,L,-,float,"Normalised traffic load in [0, 1]",Eq. (6)
+trajectories,throughput_Gbps,Q,Gbit/s,float,Throughput demand,Sec. IV-A
+trajectories,V_core_V,V,V,float,Core voltage,Eq. (8)
+trajectories,I_core_A,I,A,float,Core current,Eq. (7)
+trajectories,P_core_W,P,W,float,"Power, P = V*I",Sec. IV-B
+trajectories,theta_C_perW,theta,degC/W,float,Junction-to-ambient thermal resistance,Eq. (9)
+trajectories,T_junction_C,T_j,degC,float,Junction temperature,Eq. (10)
+trajectories,deltaT_24h,DeltaT^(24),degC,float,"Peak-to-peak junction temperature over the trailing 24 h, current hour included (shorter window during the first 23 h, so 0 at hour 0)",Sec. IV-B
+trajectories,DR_EM,DR_EM,1/h,float,"Electromigration damage rate, S*zeta*a_EM","Eqs. (11), (16)"
+trajectories,DR_TDDB,DR_TDDB,1/h,float,"Dielectric-breakdown (TDDB) damage rate, S*zeta*a_TDDB","Eqs. (12), (16)"
+trajectories,DR_TH,DR_TH,1/h,float,"Thermal-aging damage rate, S*zeta*a_TH","Eqs. (13), (16)"
+trajectories,DR_SF,DR_SF,1/h,float,"Solder-fatigue damage rate, S*zeta*a_SF","Eqs. (15), (16)"
+trajectories,DR_comp,DR_comp,1/h,float,"Composite damage rate, sum of w_m*DR_m",Eq. (16)
+trajectories,DI_EM,DI_EM,-,float,"Cumulative electromigration damage (unweighted, not capped; can exceed 1)",Eq. (1)
+trajectories,DI_TDDB,DI_TDDB,-,float,"Cumulative TDDB damage (unweighted, not capped; can exceed 1)",Eq. (1)
+trajectories,DI_TH,DI_TH,-,float,"Cumulative thermal-aging damage (unweighted, not capped; can exceed 1)",Eq. (1)
+trajectories,DI_SF,DI_SF,-,float,"Cumulative solder-fatigue damage (unweighted, not capped; can exceed 1)",Eq. (1)
+trajectories,DI_comp,DI_comp,-,float,"Composite damage index, sum of w_m*DI_m, capped at D_crit = 1","Eqs. (1), (2)"
+trajectories,failed_flag,-,-,int,"1 on the failure row (first hour with DI_comp >= 1), otherwise 0",Sec. IV-E
+trajectories,RUL_pof_path_h,RUL_path,h,float,True remaining useful life in hours (the RUL target; path-aware oracle label): hour_index of the failure row minus hour_index; blank for censored cards,Eq. (3)
+trajectories,RUL_const_h,RUL_const,h,float,"Constant-rate RUL baseline, (1 - DI_comp)/max(DR_comp, 1e-12); given on every row, including censored cards",Eq. (4)
+card_summary,card_id,i,-,int,"Card identifier, 0-199",Sec. V
+card_summary,domain,d_i,-,str,Operating environment,Table I
+card_summary,failed,delta_i,-,int,"1 if the card failed within the horizon, 0 if right-censored",Sec. III
+card_summary,lifetime_h,T~_i,h,float,Observed lifetime in hours = number of trajectory rows = hours of operation up to and including the failure hour (the lifetimes of Table III); for failed cards the failure row has hour_index = lifetime_h - 1; 43800 for censored cards,"Sec. III, Table III, Fig. 2"
+card_summary,DI_comp_end,-,-,float,DI_comp at the end of observation (1.0 for failed cards),Fig. 5
+card_summary,share_EM,-,-,float,"Share of weighted composite damage w_m*DI_m at end of observation, EM",Fig. 7
+card_summary,share_TDDB,-,-,float,"Share of weighted composite damage at end of observation, TDDB",Fig. 7
+card_summary,share_TH,-,-,float,"Share of weighted composite damage at end of observation, thermal aging",Fig. 7
+card_summary,share_SF,-,-,float,"Share of weighted composite damage at end of observation, solder fatigue",Fig. 7
+card_summary,trajectory_file,-,-,str,"Path of the card's trajectory file, relative to the repository root",-
+card_parameters,card_id,i,-,int,"Card identifier, 0-199",Sec. V
+card_parameters,domain,d_i,-,str,Operating environment,Table I
+card_parameters,T0_C,T_0,degC,float,Site mean ambient temperature,"Eq. (5), Table I"
+card_parameters,Ay_C,A_y,degC,float,Yearly ambient amplitude,"Eq. (5), Table I"
+card_parameters,Ad_C,A_d,degC,float,Daily ambient amplitude,"Eq. (5), Table I"
+card_parameters,sigma_T_C,sigma_T,degC,float,Ambient noise standard deviation,"Eq. (5), Table I"
+card_parameters,phi_rad,phi,rad,float,Diurnal phase,Eq. (5)
+card_parameters,L_base,L_base,-,float,Baseline utilisation,"Eq. (6), Table II"
+card_parameters,A_day,A_day,-,float,Diurnal load amplitude,"Eq. (6), Table II"
+card_parameters,A_week,A_week,-,float,Weekly load amplitude,"Eq. (6), Table II"
+card_parameters,burst_k,k,-,float,Shape of the Gamma burst term,"Eq. (6), Table II"
+card_parameters,burst_theta,vartheta,-,float,Scale of the Gamma burst term,"Eq. (6), Table II"
+card_parameters,Q_max_Gbps,Q_max,Gbit/s,float,Maximum throughput,Sec. IV-A
+card_parameters,I_idle_A,I_idle,A,float,Idle current,"Eq. (7), Table II"
+card_parameters,I_dyn_A,I_dyn,A,float,Load-proportional current,"Eq. (7), Table II"
+card_parameters,V_nom_V,V_nom,V,float,Nominal core voltage,"Eq. (8), Table II"
+card_parameters,alpha_V,alpha,V,float,Load-droop coefficient,"Eq. (8), Table II"
+card_parameters,beta_V,beta,V,float,Degradation-droop coefficient,"Eq. (8), Table II"
+card_parameters,theta0_C_perW,theta_0,degC/W,float,Baseline thermal resistance,"Eq. (9), Table II"
+card_parameters,gamma_theta,gamma_theta,-,float,Thermal-resistance degradation coefficient,"Eq. (9), Table II"
+card_parameters,Ea_EM_eV,"E_a,EM",eV,float,Electromigration activation energy,"Eq. (11), Table II"
+card_parameters,n_EM,n,-,float,Current-density exponent,"Eq. (11), Table II"
+card_parameters,Ea_V_eV,"E_a,V",eV,float,TDDB activation energy,"Eq. (12), Table II"
+card_parameters,gamma_tilde,gamma_tilde,-,float,Dimensionless field-acceleration coefficient,"Eq. (12), Table II"
+card_parameters,Ea_TH_eV,"E_a,TH",eV,float,Thermal-aging activation energy,"Eq. (13), Table II"
+card_parameters,Ea_SF_eV,"E_a,SF",eV,float,Solder-fatigue activation energy,"Eq. (15), Table II"
+card_parameters,m_SF,m,-,float,Fatigue exponent,"Eq. (15), Table II"
+card_parameters,w_EM,w_EM,-,float,"Mechanism weight, EM","Eq. (16), Table II"
+card_parameters,w_TDDB,w_TDDB,-,float,"Mechanism weight, TDDB","Eq. (16), Table II"
+card_parameters,w_TH,w_TH,-,float,"Mechanism weight, thermal aging","Eq. (16), Table II"
+card_parameters,w_SF,w_SF,-,float,"Mechanism weight, solder fatigue","Eq. (16), Table II"
+card_parameters,zeta,zeta,-,float,Unit-to-unit manufacturing variability factor,"Eq. (16), Table II"

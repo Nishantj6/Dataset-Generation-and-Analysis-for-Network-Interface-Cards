@@ -1,0 +1,76 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite the paper given under preferred-citation."
+type: dataset
+title: "NIC Physics-of-Failure Run-to-Failure Dataset"
+abstract: >-
+  Hourly run-to-failure trajectories for 200 simulated server-class network
+  interface cards (NICs) in hot, cold and air-conditioned environments,
+  generated with a physics-of-failure model covering electromigration,
+  time-dependent dielectric breakdown, thermally activated aging and
+  solder-joint thermal-cycling fatigue. The dataset includes failure times,
+  right-censoring, path-aware and constant-rate remaining-useful-life labels,
+  and the complete generation configuration.
+version: 1.0.0
+date-released: "2026-10-06"
+license: CC-BY-4.0
+url: "https://github.com/Nishantj6/Dataset-Generation-and-Analysis-for-Network-Interface-Cards"
+repository: "https://github.com/Nishantj6/Dataset-Generation-and-Analysis-for-Network-Interface-Cards"
+keywords:
+  - predictive maintenance
+  - physics of failure
+  - remaining useful life
+  - network interface card
+  - run-to-failure dataset
+  - prognostics
+authors:
+  - given-names: Md Farhad
+    family-names: Hossain
+    affiliation: University of Canberra
+  - given-names: Nishant
+    family-names: Jagannath
+    affiliation: University of Canberra
+  - given-names: Ershadul
+    family-names: Haque
+    affiliation: University of Canberra
+  - given-names: Khaled Mahbub
+    family-names: Morshed
+    affiliation: Defence Science and Technology Group
+  - given-names: Mahbub
+    family-names: Hassan
+    affiliation: University of New South Wales
+  - given-names: Abbas
+    family-names: Jamalipour
+    affiliation: The University of Sydney
+  - given-names: Kumudu
+    family-names: Munasinghe
+    affiliation: University of Canberra
+preferred-citation:
+  type: conference-paper
+  title: "Physics-of-Failure-Guided Run-to-Failure Predictive Maintenance Dataset Generation and Analysis for Network Interface Cards"
+  authors:
+    - given-names: Md Farhad
+      family-names: Hossain
+      affiliation: University of Canberra
+    - given-names: Nishant
+      family-names: Jagannath
+      affiliation: University of Canberra
+    - given-names: Ershadul
+      family-names: Haque
+      affiliation: University of Canberra
+    - given-names: Khaled Mahbub
+      family-names: Morshed
+      affiliation: Defence Science and Technology Group
+    - given-names: Mahbub
+      family-names: Hassan
+      affiliation: University of New South Wales
+    - given-names: Abbas
+      family-names: Jamalipour
+      affiliation: The University of Sydney
+    - given-names: Kumudu
+      family-names: Munasinghe
+      affiliation: University of Canberra
+  collection-title: "Proceedings of the International Telecommunication Networks and Applications Conference (ITNAC)"
+  conference:
+    name: "International Telecommunication Networks and Applications Conference (ITNAC 2026)"
+  year: 2026
+  status: in-press

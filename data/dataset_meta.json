@@ -1,0 +1,66 @@
+{
+  "name": "NIC Physics-of-Failure run-to-failure dataset",
+  "version": "1.0.0",
+  "paper": "Physics-of-Failure-Guided Run-to-Failure Predictive Maintenance Dataset Generation and Analysis for Network Interface Cards",
+  "cards": 200,
+  "rows": 5704508,
+  "columns_per_row": 25,
+  "trajectory_files": 200,
+  "sampling_interval_h": 1,
+  "observation_horizon_h": 43800,
+  "cards_failed": 134,
+  "cards_censored": 66,
+  "censored_fraction": 0.33,
+  "environments": {
+    "hot": {
+      "cards": 67,
+      "failed": 67,
+      "censored": 0,
+      "rows": 768211,
+      "median_lifetime_h": 10445.0,
+      "failed_lifetime_min_h": 2911.0,
+      "failed_lifetime_max_h": 26843.0,
+      "mean_T_junction_C": 49.556,
+      "p95_T_junction_C": 58.773,
+      "mean_deltaT_24h_C": 12.108,
+      "weibull_shape": 2.399,
+      "weibull_scale_h": 12954.6
+    },
+    "cold": {
+      "cards": 67,
+      "failed": 33,
+      "censored": 34,
+      "rows": 2435531,
+      "median_lifetime_h": null,
+      "failed_lifetime_min_h": 14410.0,
+      "failed_lifetime_max_h": 43754.0,
+      "mean_T_junction_C": 20.319,
+      "p95_T_junction_C": 32.961,
+      "mean_deltaT_24h_C": 11.655,
+      "weibull_shape": 2.463,
+      "weibull_scale_h": 50895.5,
+      "median_lifetime_note": "exceeds the 43,800-h horizon (33 of 67 cards failed)"
+    },
+    "controlled": {
+      "cards": 66,
+      "failed": 34,
+      "censored": 32,
+      "rows": 2500766,
+      "median_lifetime_h": 43657.0,
+      "failed_lifetime_min_h": 17413.0,
+      "failed_lifetime_max_h": 43718.0,
+      "mean_T_junction_C": 34.252,
+      "p95_T_junction_C": 39.221,
+      "mean_deltaT_24h_C": 6.031,
+      "weibull_shape": 3.526,
+      "weibull_scale_h": 47903.7
+    }
+  },
+  "definitions": {
+    "rows": "card-hours (one row per card per hour; failed cards end at their failure hour)",
+    "median_lifetime_h": "median of lifetime_h over all cards of the environment, censored cards counted as +inf (Table III)",
+    "failed_lifetime_min_h / failed_lifetime_max_h": "range of lifetime_h over failed cards (Table III 'Failed-life range')",
+    "mean_T_junction_C / p95_T_junction_C / mean_deltaT_24h_C": "statistics over all rows of the environment (Table III)",
+    "weibull_shape / weibull_scale_h": "censoring-aware Weibull maximum-likelihood fit to (lifetime_h, failed) per environment, as reported in the paper (Table III, Fig. 2): SciPy Nelder-Mead on (log k, log lambda) with lifetimes in years, start (2, 5 y), default tolerances. A fully converged fit agrees to within 0.01% (hot 2.3993 / 12954.6 h, cold 2.4636 / 50895.7 h, controlled 3.5263 / 47903.9 h)"
+  }
+}

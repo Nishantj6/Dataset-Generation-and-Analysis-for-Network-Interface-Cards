@@ -1,0 +1,3 @@
+# Keep LF line endings on every platform so the checksums in SHA256SUMS stay valid.
+* text=auto eol=lf
+*.csv.gz binary

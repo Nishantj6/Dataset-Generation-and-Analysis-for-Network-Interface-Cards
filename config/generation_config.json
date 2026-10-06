@@ -1,0 +1,660 @@
+{
+  "name": "NIC Physics-of-Failure run-to-failure dataset -- generation configuration",
+  "version": "1.0.0",
+  "paper": {
+    "title": "Physics-of-Failure-Guided Run-to-Failure Predictive Maintenance Dataset Generation and Analysis for Network Interface Cards",
+    "authors": [
+      "Md Farhad Hossain",
+      "Nishant Jagannath",
+      "Ershadul Haque",
+      "Khaled Mahbub Morshed",
+      "Mahbub Hassan",
+      "Abbas Jamalipour",
+      "Kumudu Munasinghe"
+    ],
+    "venue": "International Telecommunication Networks and Applications Conference (ITNAC 2026)",
+    "year": 2026
+  },
+  "notation": "Symbols and equation/table numbers refer to the paper. Parameters with scope 'per card' were drawn once per card from the stated distribution. config/card_parameters.csv lists, for all 200 cards, the realised value of every per-card parameter plus the per-environment sigma_T_C and the global constants Q_max_Gbps and Ea_SF_eV (repeated in every row); its column names are the keys used here.",
+  "experiment": {
+    "n_cards": 200,
+    "environments": {
+      "hot": {
+        "description": "uncooled hot climate",
+        "cards": 67
+      },
+      "cold": {
+        "description": "unheated cold climate",
+        "cards": 67
+      },
+      "controlled": {
+        "description": "air-conditioned machine room",
+        "cards": 66
+      }
+    },
+    "environment_assignment": "round-robin by card_id: card_id mod 3 = 0 -> hot, 1 -> cold, 2 -> controlled",
+    "workload": "workload parameter distributions are identical in all environments",
+    "sampling_interval_h": 1,
+    "observation_horizon_h": 43800,
+    "design_life_h": 43800,
+    "hours_per_year": 8760
+  },
+  "random_number_generation": {
+    "generator": "NumPy Generator with PCG64 bit generator (numpy.random.default_rng)",
+    "parameter_sampling_seed": 42,
+    "parameter_sampling_seed_use": "per-card parameters",
+    "noise_seed": 43,
+    "noise_seed_use": "hourly noise terms (eps_T, eps_I, eps_V, eps_theta, eps_Q) and the hourly burst load B",
+    "note": "seeds are recorded for provenance; the realised per-card parameters are listed in config/card_parameters.csv and the realised hourly values are the trajectories themselves",
+    "software": "Python 3.12.8, NumPy 2.4.3"
+  },
+  "constants": {
+    "k_B_eV_per_K": 8.617e-05,
+    "celsius_to_kelvin_offset": 273.15
+  },
+  "reference_stress_state": {
+    "T_ref_K": 318.15,
+    "T_ref_C": 45.0,
+    "I_ref_A": 2.5,
+    "V_ref_V": 1.0,
+    "deltaT_ref_C": 10.0,
+    "f_ref_cycles_per_h": {
+      "value": 0.041666666666666664,
+      "expression": "1/24"
+    },
+    "note": "All acceleration factors equal 1 at the reference stress state (Sec. IV-D; reference values in Sec. V)."
+  },
+  "failure_and_censoring": {
+    "D_crit": 1.0,
+    "failure_rule": "failure at the first hour whose composite damage index reaches D_crit (Eq. 2); the card's trajectory ends at that row (failed_flag = 1)",
+    "censoring_rule": "cards whose DI_comp is still below D_crit after the last hour of the 43800-h horizon are right-censored: 43800 rows, no failure row"
+  },
+  "calibration": {
+    "parameter": "S",
+    "description": "global degradation-rate constant; the only calibrated parameter (Sec. IV-D)",
+    "unit": "1/h",
+    "target": "median lifetime of the controlled-environment population equals the design life (43800 h); censored cards count as +inf in the median",
+    "method": "geometric bisection",
+    "search_bracket_per_h": [
+      1e-07,
+      0.001
+    ],
+    "iterations": 18,
+    "S_per_h": 6.477295908439655e-05,
+    "inverse_S_h": 15438.5,
+    "inverse_S_meaning": "constant-reference-stress lifetime of a nominal card (zeta = 1)",
+    "returned_value": "geometric midpoint of the final bracket",
+    "calibration_noise": "calibration runs used the same noise seed as the released run but not the same sequence of noise draws, so their noise realisations differ",
+    "calibration_run_at_returned_S": "33 of 66 controlled cards fail within the horizon (median above 43800 h), 132 cards in total",
+    "realised_controlled_median_lifetime_h": 43657.0,
+    "released_run_at_returned_S": "34 of 66 controlled cards fail (median 43657 h), 134 cards in total"
+  },
+  "mission_profile": {
+    "ambient_temperature": {
+      "equation": "Eq. (5): T_amb = T0 + Ay*sin(2*pi*t/8760) + Ad*sin(2*pi*(t mod 24)/24 - phi) + eps_T, eps_T ~ N(0, sigma_T^2)",
+      "yearly_period_h": 8760,
+      "yearly_phase": "none: the yearly harmonic has zero phase for every card (all cards share one seasonal clock)",
+      "diurnal_period_h": 24,
+      "clip_C": [
+        -10.0,
+        55.0
+      ],
+      "per_environment": {
+        "hot": {
+          "T0_C": {
+            "distribution": "normal",
+            "mean": 36.0,
+            "sd": 1.5
+          },
+          "Ay_C": {
+            "distribution": "uniform",
+            "low": 4.0,
+            "high": 7.0
+          },
+          "Ad_C": {
+            "distribution": "uniform",
+            "low": 4.0,
+            "high": 6.0
+          },
+          "sigma_T_C": {
+            "distribution": "fixed",
+            "value": 0.7
+          }
+        },
+        "cold": {
+          "T0_C": {
+            "distribution": "normal",
+            "mean": 8.0,
+            "sd": 3.0
+          },
+          "Ay_C": {
+            "distribution": "uniform",
+            "low": 6.0,
+            "high": 9.0
+          },
+          "Ad_C": {
+            "distribution": "uniform",
+            "low": 4.0,
+            "high": 6.0
+          },
+          "sigma_T_C": {
+            "distribution": "fixed",
+            "value": 0.7
+          }
+        },
+        "controlled": {
+          "T0_C": {
+            "distribution": "normal",
+            "mean": 22.0,
+            "sd": 0.5
+          },
+          "Ay_C": {
+            "distribution": "uniform",
+            "low": 0.2,
+            "high": 0.8
+          },
+          "Ad_C": {
+            "distribution": "uniform",
+            "low": 0.5,
+            "high": 1.5
+          },
+          "sigma_T_C": {
+            "distribution": "fixed",
+            "value": 0.25
+          }
+        }
+      },
+      "parameters": {
+        "T0_C": {
+          "symbol": "T_0",
+          "unit": "degC",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "per environment",
+            "see": "per_environment"
+          },
+          "description": "site mean ambient temperature (Table I)"
+        },
+        "Ay_C": {
+          "symbol": "A_y",
+          "unit": "degC",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "per environment",
+            "see": "per_environment"
+          },
+          "description": "yearly amplitude (Table I)"
+        },
+        "Ad_C": {
+          "symbol": "A_d",
+          "unit": "degC",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "per environment",
+            "see": "per_environment"
+          },
+          "description": "daily amplitude (Table I)"
+        },
+        "sigma_T_C": {
+          "symbol": "sigma_T",
+          "unit": "degC",
+          "scope": "per environment",
+          "sampling": {
+            "distribution": "per environment",
+            "see": "per_environment"
+          },
+          "description": "standard deviation of the hourly Gaussian noise eps_T (Table I)"
+        },
+        "phi_rad": {
+          "symbol": "phi",
+          "unit": "rad",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.0,
+            "high": 6.283185307179586
+          },
+          "description": "diurnal phase"
+        }
+      }
+    },
+    "traffic_load": {
+      "equation": "Eq. (6): L = clip(L_base + A_day*(1 + sin(2*pi*(t mod 24)/24 - pi/2))/2 + A_week*(1 + sin(2*pi*t/168))/2 + B, 0, 1), B ~ Gamma(shape=burst_k, scale=burst_theta)",
+      "weekly_period_h": 168,
+      "clip": [
+        0.0,
+        1.0
+      ],
+      "parameters": {
+        "L_base": {
+          "symbol": "L_base",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.15,
+            "high": 0.35
+          },
+          "description": "baseline utilisation"
+        },
+        "A_day": {
+          "symbol": "A_day",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.25,
+            "high": 0.45
+          },
+          "description": "diurnal amplitude"
+        },
+        "A_week": {
+          "symbol": "A_week",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.05,
+            "high": 0.15
+          },
+          "description": "weekly amplitude"
+        },
+        "burst_k": {
+          "symbol": "k",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 1.2,
+            "high": 1.8
+          },
+          "description": "shape of the Gamma-distributed burst term B (drawn hourly)"
+        },
+        "burst_theta": {
+          "symbol": "vartheta",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.02,
+            "high": 0.04
+          },
+          "description": "scale of the Gamma-distributed burst term B"
+        }
+      }
+    },
+    "throughput": {
+      "equation": "Q = max(Q_max*L + eps_Q, 0), eps_Q ~ N(0, sigma_Q^2) (Sec. IV-A)",
+      "parameters": {
+        "Q_max_Gbps": {
+          "symbol": "Q_max",
+          "unit": "Gbit/s",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 25.0
+          },
+          "description": "maximum throughput (same for every card; repeated in card_parameters.csv)"
+        },
+        "sigma_Q_Gbps": {
+          "symbol": "sigma_Q",
+          "unit": "Gbit/s",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.3
+          },
+          "description": "throughput noise standard deviation (same for every card)"
+        }
+      }
+    }
+  },
+  "electrical_thermal_state": {
+    "current": {
+      "equation": "Eq. (7): I = I_idle + I_dyn*L + eps_I, eps_I ~ N(0, sigma_I^2)",
+      "parameters": {
+        "I_idle_A": {
+          "symbol": "I_idle",
+          "unit": "A",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.9,
+            "high": 1.1
+          },
+          "description": "idle current"
+        },
+        "I_dyn_A": {
+          "symbol": "I_dyn",
+          "unit": "A",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 2.2,
+            "high": 2.8
+          },
+          "description": "load-proportional current"
+        },
+        "sigma_I_A": {
+          "symbol": "sigma_I",
+          "unit": "A",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.04
+          },
+          "description": "current noise standard deviation (same for every card)"
+        }
+      }
+    },
+    "voltage": {
+      "equation": "Eq. (8): V = V_nom - alpha*L - beta*DI_comp(previous hour) + eps_V, eps_V ~ N(0, sigma_V^2)",
+      "parameters": {
+        "V_nom_V": {
+          "symbol": "V_nom",
+          "unit": "V",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.98,
+            "high": 1.02
+          },
+          "description": "nominal core voltage"
+        },
+        "alpha_V": {
+          "symbol": "alpha",
+          "unit": "V",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.02,
+            "high": 0.04
+          },
+          "description": "load-droop coefficient"
+        },
+        "beta_V": {
+          "symbol": "beta",
+          "unit": "V",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.03,
+            "high": 0.06
+          },
+          "description": "degradation-droop coefficient"
+        },
+        "sigma_V_V": {
+          "symbol": "sigma_V",
+          "unit": "V",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.004
+          },
+          "description": "voltage noise standard deviation (same for every card)"
+        }
+      }
+    },
+    "power": {
+      "equation": "P = V*I (Sec. IV-B)"
+    },
+    "thermal_resistance": {
+      "equation": "Eq. (9): theta = theta0*(1 + gamma_theta*DI_comp(previous hour)) + eps_theta, eps_theta ~ N(0, sigma_theta^2)",
+      "parameters": {
+        "theta0_C_perW": {
+          "symbol": "theta_0",
+          "unit": "degC/W",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 4.0,
+            "high": 6.0
+          },
+          "description": "baseline thermal resistance"
+        },
+        "gamma_theta": {
+          "symbol": "gamma_theta",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.2,
+            "high": 0.5
+          },
+          "description": "thermal-resistance degradation coefficient"
+        },
+        "sigma_theta_C_perW": {
+          "symbol": "sigma_theta",
+          "unit": "degC/W",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.05
+          },
+          "description": "thermal-resistance noise standard deviation (same for every card)"
+        }
+      }
+    },
+    "junction_temperature": {
+      "equation": "Eq. (10): T_j = clip(T_amb + theta*P, T_min, T_max)",
+      "clip_C": [
+        -10.0,
+        110.0
+      ]
+    },
+    "thermal_excursion": {
+      "definition": "deltaT_24h = max - min of T_j over the trailing 24 hourly samples, current hour included (fewer samples during the first 23 h, so deltaT_24h = 0 at hour 0); treated as one thermal cycle per day (Sec. IV-B)",
+      "window_h": 24
+    },
+    "degradation_feedback": "V and theta use the composite damage index of the previous hour, 0 at hour 0 (Eqs. (8), (9))"
+  },
+  "damage_mechanisms": {
+    "mechanisms": {
+      "EM": "electromigration",
+      "TDDB": "time-dependent dielectric breakdown",
+      "TH": "thermally activated aging",
+      "SF": "solder-joint thermal-cycling fatigue"
+    },
+    "acceleration_factor": "a_m = TF_m(reference stress) / TF_m(stress at hour t) (Sec. IV-C)",
+    "arrhenius_term": "Arr(Ea) = exp[(Ea/k_B)*(1/T_ref_K - 1/T_K)], T_K = T_j + 273.15 (Eqs. (11)-(15))",
+    "EM": {
+      "equation": "Eq. (11): a_EM = (I/I_ref)^n_EM * Arr(Ea_EM)",
+      "parameters": {
+        "Ea_EM_eV": {
+          "symbol": "E_a,EM",
+          "unit": "eV",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.75,
+            "high": 0.9
+          },
+          "description": "electromigration activation energy (Table II)"
+        },
+        "n_EM": {
+          "symbol": "n",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 1.5,
+            "high": 2.0
+          },
+          "description": "current-density exponent (Table II)"
+        }
+      }
+    },
+    "TDDB": {
+      "equation": "Eq. (12): a_TDDB = exp[gamma_tilde*(V/V_ref - 1)] * Arr(Ea_V)",
+      "parameters": {
+        "Ea_V_eV": {
+          "symbol": "E_a,V",
+          "unit": "eV",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.6,
+            "high": 0.8
+          },
+          "description": "TDDB activation energy (Table II)"
+        },
+        "gamma_tilde": {
+          "symbol": "gamma_tilde",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 8.0,
+            "high": 15.0
+          },
+          "description": "dimensionless field-acceleration coefficient gamma*E_ref (Table II)"
+        }
+      }
+    },
+    "TH": {
+      "equation": "Eq. (13): a_TH = Arr(Ea_TH)",
+      "parameters": {
+        "Ea_TH_eV": {
+          "symbol": "E_a,TH",
+          "unit": "eV",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 0.5,
+            "high": 0.7
+          },
+          "description": "thermal-aging activation energy (Table II)"
+        }
+      }
+    },
+    "SF": {
+      "equation": "Eq. (15): a_SF = (max(deltaT_24h, deltaT_floor)/deltaT_ref)^m_SF * Arr(Ea_SF)",
+      "thermal_cycle_frequency": "one cycle per day, f = f_ref = 1/24 cycles/h, so the Norris-Landzberg frequency factor (f/f_ref)^q equals 1",
+      "parameters": {
+        "Ea_SF_eV": {
+          "symbol": "E_a,SF",
+          "unit": "eV",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.122
+          },
+          "description": "solder-fatigue activation energy (Table II; same for every card, repeated in card_parameters.csv)"
+        },
+        "m_SF": {
+          "symbol": "m",
+          "unit": "-",
+          "scope": "per card",
+          "sampling": {
+            "distribution": "uniform",
+            "low": 1.9,
+            "high": 2.5
+          },
+          "description": "fatigue exponent (Table II)"
+        },
+        "deltaT_floor_C": {
+          "symbol": "-",
+          "unit": "degC",
+          "scope": "global",
+          "sampling": {
+            "distribution": "fixed",
+            "value": 0.1
+          },
+          "description": "lower bound applied to deltaT_24h inside a_SF (avoids a zero rate at hour 0)"
+        }
+      }
+    }
+  },
+  "composite_damage": {
+    "mechanism_rate": "Eq. (16): DR_m = S * zeta * a_m (1/h), unweighted",
+    "composite_rate": "Eq. (16): DR_comp = sum over m of w_m * DR_m",
+    "accumulation": "Eq. (1), dt = 1 h: DI_m = DI_m(previous hour) + DR_m*dt and DI_comp = DI_comp(previous hour) + DR_comp*dt, starting from 0 before the first row, so DI_comp = sum over m of w_m*DI_m",
+    "parameters": {
+      "w_EM": {
+        "symbol": "w_EM",
+        "unit": "-",
+        "scope": "per card",
+        "sampling": {
+          "distribution": "normalised uniform",
+          "u_m": {
+            "distribution": "uniform",
+            "low": 0.25,
+            "high": 1.0
+          },
+          "w_m": "u_m / (u_EM + u_TDDB + u_TH + u_SF), u_m drawn per card and mechanism"
+        },
+        "description": "mechanism weight (EM)"
+      },
+      "w_TDDB": {
+        "symbol": "w_TDDB",
+        "unit": "-",
+        "scope": "per card",
+        "sampling": {
+          "distribution": "normalised uniform",
+          "u_m": {
+            "distribution": "uniform",
+            "low": 0.25,
+            "high": 1.0
+          },
+          "w_m": "u_m / (u_EM + u_TDDB + u_TH + u_SF), u_m drawn per card and mechanism"
+        },
+        "description": "mechanism weight (TDDB)"
+      },
+      "w_TH": {
+        "symbol": "w_TH",
+        "unit": "-",
+        "scope": "per card",
+        "sampling": {
+          "distribution": "normalised uniform",
+          "u_m": {
+            "distribution": "uniform",
+            "low": 0.25,
+            "high": 1.0
+          },
+          "w_m": "u_m / (u_EM + u_TDDB + u_TH + u_SF), u_m drawn per card and mechanism"
+        },
+        "description": "mechanism weight (TH)"
+      },
+      "w_SF": {
+        "symbol": "w_SF",
+        "unit": "-",
+        "scope": "per card",
+        "sampling": {
+          "distribution": "normalised uniform",
+          "u_m": {
+            "distribution": "uniform",
+            "low": 0.25,
+            "high": 1.0
+          },
+          "w_m": "u_m / (u_EM + u_TDDB + u_TH + u_SF), u_m drawn per card and mechanism"
+        },
+        "description": "mechanism weight (SF)"
+      },
+      "zeta": {
+        "symbol": "zeta",
+        "unit": "-",
+        "scope": "per card",
+        "sampling": {
+          "distribution": "lognormal",
+          "meanlog": 0.0,
+          "sdlog": 0.35
+        },
+        "description": "unit-to-unit manufacturing variability factor"
+      }
+    }
+  },
+  "rul_labels": {
+    "RUL_pof_path_h": "Eq. (3): path-aware (oracle) RUL in hours = hour_index of the failure row - hour_index for failed cards (0 on the failure row); blank for right-censored cards",
+    "RUL_const_h": "Eq. (4): (D_crit - DI_comp) / max(DR_comp, epsilon), computed in float64 from the stored float32 DI_comp and DR_comp for every row, including the rows of censored cards",
+    "epsilon_per_h": 1e-12,
+    "censored_lower_bound": "for censored cards the true RUL is only known to be at least 43800 - hour_index hours; this bound is not stored as a column",
+    "note": "Sec. IV-E of the paper says that only the censoring indicator and the lower bound are retained for censored units; this release additionally provides RUL_const_h on their rows"
+  },
+  "output_format": {
+    "trajectories": "one gzip-compressed CSV per card, data/trajectories/<environment>/card_<id>.csv.gz; header row, comma-separated, LF line endings; the only empty fields are RUL_pof_path_h of censored cards",
+    "precision": "observables, damage rates, damage indices and RUL_const_h are single-precision (float32) values; RUL_pof_path_h is a whole number of hours written as a float (e.g. 2984.0). DI_EM..DI_SF, DI_comp and DR_comp are rounded to float32 once from float64, whereas DR_EM..DR_SF are float32((S*zeta)*float32(a_m)), i.e. rounded twice, so they can differ by one float32 unit in the last place from a single rounding, from DI_m at hour 0, and in sum(w_m*DR_m) versus DR_comp",
+    "row_timing": "the row with hour_index t covers hour t: its observables are the values of hour t and its damage indices include the damage accrued during hour t, so DI(t) = sum over s = 0..t of DR(s) x 1 h (at t = 0, DI_comp equals DR_comp exactly and DI_m equals DR_m to within one float32 unit in the last place)",
+    "time_conventions": "t in every equation above is the hour_index (the harmonics of Eqs. (5)-(6) are evaluated at t = hour_index). The damage indices of row t include the damage of hours 0..t, whereas the paper writes Eq. (1) with DI = 0 at time 0. lifetime_h in card_summary.csv counts the hours of operation up to and including the failure hour (hour_index of the failure row + 1; these are the lifetimes of Table III), and RUL_pof_path_h = hour_index of the failure row - hour_index",
+    "DI_comp_cap": "DI_comp is capped at D_crit = 1 in the released files (the failure row reports 1.0); DI_EM, DI_TDDB, DI_TH and DI_SF are not capped"
+  }
+}
